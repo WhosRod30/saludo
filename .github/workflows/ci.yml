@@ -1,0 +1,45 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    -name: Checkout code
+     uses: actions/checkout@v3
+    -name: Configurar JDK
+       uses: actions/setup-java@v3
+       with:
+       java-version: '17'
+       distribution: 'temurin'
+    -name: Compilar con Maven
+    run: mvn -B package --file pom.xml
+
+    -name: Ejecutar pruebas
+    run: mvn test
+
+  deploy: 
+   need:s: build 
+    runs-on: ubuntu-latest
+    steps:
+     -name: Checkout
+      uses: actions/checkout@v3
+
+      -name: Configurar JDK
+       uses: actions/setup-java@v3
+       with:
+       java-version: '17'
+       distribution: 'temurin'
+      -name: Compilar JAR
+        run:mvn clean package -DskipTests
+
+        -name: Guardar artefacto
+         uses: actions/upload-artifact@v3
+         with:
+          name: app
+          path:target/*.jar
